@@ -6,7 +6,7 @@ steps:
   - name: build
     image: alpine:latest
     commands:
-      - apk add --no-cache cmake make git arm-none-eabi-gcc
+      - apk update apk add --no-cache cmake make git gcc-arm-none-eabi
       - mkdir build && cd build
       - cmake .. -DCMAKE_TOOLCHAIN_FILE=../toolchain.cmake
       - make
