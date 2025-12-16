@@ -1,27 +1,26 @@
 kind: pipeline
 type: docker
-name: simple-arm-build
+name: alpine-arm-build
 
 steps:
   - name: build
-    image: pstauffer/gcc-arm-none-eabi:latest
+    image: alpine:edge  # 使用 edge 版本以获取最新包
     commands:
-      # 创建构建目录
+      # 安装必要工具（在单条命令中减少层大小）
+      - apk add --no-cache \
+          cmake \
+          make \
+          build-base \
+          git \
+          arm-none-eabi-gcc \
+          arm-none-eabi-newlib \
+          arm-none-eabi-binutils
+      
+      # 验证安装
+      - arm-none-eabi-gcc --version
+      - cmake --version
+      
+      # 创建构建目录并编译
       - mkdir -p build && cd build
-      
-      # 配置并编译
-      - cmake .. \
-        -DCMAKE_BUILD_TYPE=Release \
-        -DCMAKE_SYSTEM_NAME=Generic \
-        -DCMAKE_SYSTEM_PROCESSOR=ARM \
-        -DCMAKE_C_COMPILER=arm-none-eabi-gcc \
-        -DCMAKE_CXX_COMPILER=arm-none-eabi-g++ \
-        -DCMAKE_ASM_COMPILER=arm-none-eabi-gcc \
-        -DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY
-      
-      # 编译
+      - cmake .. -DCMAKE_TOOLCHAIN_FILE=../toolchain.cmake
       - make -j$(nproc)
-      
-      # 验证输出
-      - echo "构建完成，输出文件:"
-      - find . -name "*.elf" -o -name "*.bin" -o -name "*.hex" | xargs ls -la
