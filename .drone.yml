@@ -4,7 +4,7 @@ name: minimal-arm-build
 
 steps:
   - name: build
-    image: alpine:edge
+    image: alpine:latest
     commands:
       - apk add --no-cache cmake make git arm-none-eabi-gcc
       - mkdir build && cd build
