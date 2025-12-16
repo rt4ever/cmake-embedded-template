@@ -1,32 +1,12 @@
 kind: pipeline
 type: docker
-name: arm-embedded-build
+name: minimal-arm-build
 
 steps:
-  # 第一步：使用 alpine 官方镜像
   - name: build
-    image: alpine:3.19
+    image: alpine:edge
     commands:
-      # 更换为国内镜像源
-      - sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
-      - apk update
-      
-      # 尝试安装 ARM GCC（Alpine 社区仓库可能有）
-      - apk add --no-cache \
-          cmake \
-          make \
-          build-base \
-          git \
-          python3 \
-          py3-pip
-      
-      # 如果 ARM GCC 不可用，使用系统 GCC 模拟（仅用于测试）
-      - gcc --version || true
-      - cmake --version
-      
-      # 构建（使用本地 GCC 作为占位符）
-      - mkdir -p build && cd build
-      - cmake .. -DCMAKE_BUILD_TYPE=Debug
+      - apk add --no-cache cmake make git arm-none-eabi-gcc
+      - mkdir build && cd build
+      - cmake .. -DCMAKE_TOOLCHAIN_FILE=../toolchain.cmake
       - make
-    when:
-      event: [push, pull_request]
