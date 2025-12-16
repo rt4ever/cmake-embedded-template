@@ -1,0 +1,54 @@
+kind: pipeline
+type: docker
+name: embedded-cmake-build
+
+# 定义工作空间，确保构建在隔离的子目录中进行
+workspace:
+  base: /go
+  path: src/${DRONE_REPO_NAME}
+
+steps:
+  - name: build_firmware
+    # 🥇 使用指定的轻量级 Docker 镜像，其中已包含 arm-none-eabi-gcc, cmake, ninja
+    image: conradmurphy/arm-none-aebi-gcc:latest
+    
+    commands:
+      # 1. 创建并进入构建目录
+      - mkdir build
+      - cd build
+
+      # 2. 配置 CMake (使用 Ninja 生成构建文件)
+      - cmake -G "Ninja" .. 
+      
+      # 3. 执行构建 (这会调用所有的编译、链接和 objcopy 命令)
+      - ninja
+    
+    # 确保 CI/CD 引擎能够正确缓存依赖项（如果需要的话，但通常对于轻量级镜像可省略）
+    # volumes:
+    #   - name: toolchain_cache
+    #     path: /usr/local/arm-none-eabi
+      
+  - name: verify_and_list_artifacts
+    image: busybox
+    # 目的：在产物收集前，验证文件是否已生成
+    commands:
+      - echo "Listing generated firmware artifacts in build/src/..."
+      # 默认情况下，文件在构建目录下的子目录 (build/src/)
+      - ls -l build/src/ 
+      - echo "Firmware generation complete."
+      
+  - name: publish_artifacts
+    image: plugins/artifact
+    settings:
+      # 收集需要保存的最终固件文件
+      # 🚨 注意：如果您的 CMake 配置修改了输出路径到 build/，请将 build/src/ 改为 build/
+      files: |
+        build/src/*.elf
+        build/src/*.bin
+        build/src/*.hex
+      # 将产物命名为以 Commit Hash 为后缀的 zip 文件
+      target: artifacts/${DRONE_COMMIT:0:8}.zip 
+
+# volumes:
+#   - name: toolchain_cache
+#     temp: {} # 临时卷，用于缓存大的工具链或依赖
