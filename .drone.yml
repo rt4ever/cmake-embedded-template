@@ -8,5 +8,9 @@ steps:
     commands:
       - apk add --no-cache cmake make git arm-none-eabi-gcc
       - mkdir build && cd build
-      - cmake .. -DCMAKE_TOOLCHAIN_FILE=../toolchain.cmake
-      - make
+      - cmake -G "Ninja"
+      - ninja
+      
+trigger:
+  event:
+    - pull_request
