@@ -6,9 +6,9 @@ steps:
   - name: build
     image: alpine:latest
     commands:
-      - apk add --no-cache cmake make git gcc-arm-none-eabi
+      - apk add --no-cache cmake make git gcc-arm-none-eabi ninja
       - mkdir build && cd build
-      - cmake -G "Ninja"
+      - cmake -G "Ninja" ..
       - ninja
       
 trigger:
