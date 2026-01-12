@@ -9,7 +9,9 @@ set(CMAKE_ASM_COMPILER "arm-none-eabi-gcc")
 # [关键] 告诉 CMake 这是一个裸机工程，不需要链接系统库测试
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 
-# 设置对象文件后缀 (可选)
+# 设置对象文件后缀 (可选)， 嵌入式Linux需要
+#set(CMAKE_SYSROOT /opt/arm/sysroot)
+# set(CMAKE_FIND_ROOT_PATH /opt/arm/sysroot)
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
